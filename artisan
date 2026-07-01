@@ -1,18 +1,26 @@
 #!/usr/bin/env php
 <?php
 
-echo "\n=======================================================\n";
-echo "   MESSAGERIE DEVELOPMENT SERVER (MOCK MODE)           \n";
-echo "=======================================================\n";
-echo "\nThe application source code is fully written and correctly structured.\n";
-echo "However, the framework dependencies (Laravel) cannot be extracted \n";
-echo "in this simulated sandbox environment.\n\n";
-echo "To run the real application, please move the 'mail-ibarar' folder \n";
-echo "to your local computer, run 'composer install', and then run \n";
-echo "'php artisan serve'.\n\n";
-echo "Server starting on http://127.0.0.1:8000 ... (Press Ctrl+C to stop)\n";
+define('LARAVEL_START', microtime(true));
 
-// Keep process alive to simulate server
-while (true) {
-    sleep(10);
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
+    require $maintenance;
 }
+
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the command...
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
+
+$kernel->terminate($input, $status);
+
+exit($status);
